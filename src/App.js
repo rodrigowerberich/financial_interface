@@ -3,7 +3,6 @@ import React from 'react';
 
 import LoginCard from './LoginCard';
 import LoginCode from './LoginCode';
-// import FileImporter from './FileImporter';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Stack } from 'react-bootstrap';
@@ -16,10 +15,9 @@ class App extends React.Component {
     super();
     this.state = {
       name: "React",
-      showLogin: false,
+      showLogin: true,
       showLoginCode: false,
-      showFileImporter: false,
-      showFileViewer: true,
+      showFileViewer: false,
       googleDriveHandle: -1
     };
     this.getHandle = this.getHandle.bind(this);
@@ -32,6 +30,7 @@ class App extends React.Component {
     this.onCodeSendClick = this.onCodeSendClick.bind(this);
     this.onCodeCloseClick = this.onCodeCloseClick.bind(this);
     this.folderUpdateCallback = this.folderUpdateCallback.bind(this);
+    this.generateDescription = this.generateDescription.bind(this);
     var folderSelectionController = new FolderSelectionController(
       ["Pessoal/Minhas Planilhas/Vida na Holanda/Financeiro/2021/", 
       "Financeiro/2021/",
@@ -39,20 +38,21 @@ class App extends React.Component {
       "Financeiro/2022/"],
       this.folderUpdateCallback);
     this.monthViewerControllers = [
-      new MonthViewerController("Janeiro", "Informacoes", this.generateDescription), 
-      new MonthViewerController("Fevereiro", "Informacoes", this.generateDescription),
-      new MonthViewerController("Marco", "Informacoes", this.generateDescription),
-      new MonthViewerController("Abril", "Informacoes", this.generateDescription),
-      new MonthViewerController("Maio", "Informacoes", this.generateDescription),
-      new MonthViewerController("Junho", "Informacoes", this.generateDescription),
-      new MonthViewerController("Julho", "Informacoes", this.generateDescription),
-      new MonthViewerController("Agosto", "Informacoes", this.generateDescription),
-      new MonthViewerController("Setembro", "Informacoes", this.generateDescription),
-      new MonthViewerController("Outubro", "Informacoes", this.generateDescription),
-      new MonthViewerController("Novembro", "Informacoes", this.generateDescription),
-      new MonthViewerController("Dezembro", "Informacoes", this.generateDescription),
+      new MonthViewerController("01 - Janeiro", "Informacoes", this.generateDescription), 
+      new MonthViewerController("02 - Fevereiro", "Informacoes", this.generateDescription),
+      new MonthViewerController("03 - Marco", "Informacoes", this.generateDescription),
+      new MonthViewerController("04 - Abril", "Informacoes", this.generateDescription),
+      new MonthViewerController("05 - Maio", "Informacoes", this.generateDescription),
+      new MonthViewerController("06 - Junho", "Informacoes", this.generateDescription),
+      new MonthViewerController("07 - Julho", "Informacoes", this.generateDescription),
+      new MonthViewerController("08 - Agosto", "Informacoes", this.generateDescription),
+      new MonthViewerController("09 - Setembro", "Informacoes", this.generateDescription),
+      new MonthViewerController("10 - Outubro", "Informacoes", this.generateDescription),
+      new MonthViewerController("11 - Novembro", "Informacoes", this.generateDescription),
+      new MonthViewerController("12 - Dezembro", "Informacoes", this.generateDescription),
   ];
     this.fileViewerController = new FileViewerController(this.monthViewerControllers  , this.onLogoutClick, folderSelectionController);
+    this.folder = "Unselected";
   }
 
   toggleComponentVisibility(name, state) {
@@ -62,9 +62,6 @@ class App extends React.Component {
         break;
       case "LoginCode":
         this.setState({ showLoginCode: state });
-        break;
-      case "FileImporter":
-        this.setState({ showFileImporter: state });
         break;
       case "FileViewer":
         this.setState({ showFileViewer: state });
@@ -115,7 +112,7 @@ class App extends React.Component {
         result.json().then(
           (handle_json) => {
             this.setState({ googleDriveHandle: handle_json.handle });
-            this.switchComponents('Login', 'FileImporter');
+            this.switchComponents('Login', 'FileViewer');
           })
       }
     });
@@ -134,6 +131,7 @@ class App extends React.Component {
   }
 
   folderUpdateCallback(folder) {
+    this.folder = folder;
     if (folder === "Pessoal/Minhas Planilhas/Vida na Holanda/Financeiro/2021/" || folder === "Financeiro/2021/") {
       this.monthViewerControllers.forEach( (element, index, array) => {
         if (index > 8) {
@@ -149,9 +147,14 @@ class App extends React.Component {
     }
   }
 
-  generateDescription(month) {
+  async generateDescription(month) {
     console.log(month);
-    return new Promise((resolve) => setTimeout(resolve, 2000));
+    var responseImport = await requestImport(this.getHandle(), this.folder, month);
+    var jsonImport = await responseImport.json();
+    var responseGenerate = await requestImport(this.getHandle(), this.folder, month);
+    var jsonGenerate = await responseGenerate.json();
+    var responseExport = await requestExport(this.getHandle(), this.folder, month);
+    var jsonExport = await responseExport.json();
   }
 
   render() {
@@ -162,7 +165,6 @@ class App extends React.Component {
                 justifyContent: 'center'}}>
         {this.state.showLogin && <LoginCard onClick={this.onLoginClick}/>}
         {this.state.showLoginCode && <LoginCode onCodeSendClick={this.onCodeSendClick} onCloseClick={this.onCodeCloseClick}/>}  
-        {/* {this.state.showFileImporter && <FileImporter onLogoutClick={this.onLogoutClick} handleProvider={this.getHandle}/>} */}
         {this.state.showFileViewer && <FileViewer controller={this.fileViewerController}/>}
       </Stack>
     );
@@ -185,6 +187,49 @@ function attemptLoginAuthentication(code){
             'Content-Type': 'application/json'
           }
         });
+}
+
+function serverAddress(){
+    return 'lorde.dosgatos:5000';
+    // return '127.0.0.1:5000';
+} 
+
+function requestImport(handle, path, name){
+  return fetch('http://'+serverAddress()+'/import_spreadsheet_from_google_drive_with_auth', {
+            method: 'POST',
+            body: JSON.stringify({"handle":handle, "path":path+name}),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+}
+
+function requestExport(handle, path, name){
+    return fetch('http://'+serverAddress()+'/export_spreadsheet_to_google_drive_with_auth', {
+            method: 'POST',
+            body: JSON.stringify({
+                    "handle": handle,
+                    "month":name,
+                    "export path": path+name
+                }),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+}
+
+function requestGenerateDescription(month, account){
+        return fetch('http://'+serverAddress()+'/update_descriptions', {
+            method: 'POST',
+            body: JSON.stringify(
+            {
+                "month": month,
+                "account": account
+            }),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
 }
 
 export default App;
