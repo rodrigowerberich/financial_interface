@@ -3,7 +3,7 @@ import React from 'react';
 
 import LoginCard from './LoginCard';
 import LoginCode from './LoginCode';
-import FileImporter from './FileImporter';
+// import FileImporter from './FileImporter';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Stack } from 'react-bootstrap';
@@ -34,23 +34,25 @@ class App extends React.Component {
     this.folderUpdateCallback = this.folderUpdateCallback.bind(this);
     var folderSelectionController = new FolderSelectionController(
       ["Pessoal/Minhas Planilhas/Vida na Holanda/Financeiro/2021/", 
-      "Financeiro/2021/"],
+      "Financeiro/2021/",
+      "Pessoal/Minhas Planilhas/Vida na Holanda/Financeiro/2022/", 
+      "Financeiro/2022/"],
       this.folderUpdateCallback);
-    var monthViewerControllers = [
-      new MonthViewerController("Janeiro", "Informacoes"), 
-      new MonthViewerController("Fevereiro", "Informacoes"),
-      new MonthViewerController("Marco", "Informacoes"),
-      new MonthViewerController("Abril", "Informacoes"),
-      new MonthViewerController("Maio", "Informacoes"),
-      new MonthViewerController("Junho", "Informacoes"),
-      new MonthViewerController("Julho", "Informacoes"),
-      new MonthViewerController("Agosto", "Informacoes"),
-      new MonthViewerController("Setembro", "Informacoes"),
-      new MonthViewerController("Outubro", "Informacoes"),
-      new MonthViewerController("Novembro", "Informacoes"),
-      new MonthViewerController("Dezembro", "Informacoes"),
+    this.monthViewerControllers = [
+      new MonthViewerController("Janeiro", "Informacoes", this.generateDescription), 
+      new MonthViewerController("Fevereiro", "Informacoes", this.generateDescription),
+      new MonthViewerController("Marco", "Informacoes", this.generateDescription),
+      new MonthViewerController("Abril", "Informacoes", this.generateDescription),
+      new MonthViewerController("Maio", "Informacoes", this.generateDescription),
+      new MonthViewerController("Junho", "Informacoes", this.generateDescription),
+      new MonthViewerController("Julho", "Informacoes", this.generateDescription),
+      new MonthViewerController("Agosto", "Informacoes", this.generateDescription),
+      new MonthViewerController("Setembro", "Informacoes", this.generateDescription),
+      new MonthViewerController("Outubro", "Informacoes", this.generateDescription),
+      new MonthViewerController("Novembro", "Informacoes", this.generateDescription),
+      new MonthViewerController("Dezembro", "Informacoes", this.generateDescription),
   ];
-    this.fileViewerController = new FileViewerController(monthViewerControllers, this.onLogoutClick, folderSelectionController);
+    this.fileViewerController = new FileViewerController(this.monthViewerControllers  , this.onLogoutClick, folderSelectionController);
   }
 
   toggleComponentVisibility(name, state) {
@@ -132,7 +134,24 @@ class App extends React.Component {
   }
 
   folderUpdateCallback(folder) {
-    console.log(folder);
+    if (folder === "Pessoal/Minhas Planilhas/Vida na Holanda/Financeiro/2021/" || folder === "Financeiro/2021/") {
+      this.monthViewerControllers.forEach( (element, index, array) => {
+        if (index > 8) {
+          element.disabled = false;
+        }else {
+          element.disabled = true;
+        }
+      } );
+    } else {
+      this.monthViewerControllers.forEach( (element, index, array) => {
+        element.disabled = false;
+      } );
+    }
+  }
+
+  generateDescription(month) {
+    console.log(month);
+    return new Promise((resolve) => setTimeout(resolve, 2000));
   }
 
   render() {
@@ -143,7 +162,7 @@ class App extends React.Component {
                 justifyContent: 'center'}}>
         {this.state.showLogin && <LoginCard onClick={this.onLoginClick}/>}
         {this.state.showLoginCode && <LoginCode onCodeSendClick={this.onCodeSendClick} onCloseClick={this.onCodeCloseClick}/>}  
-        {this.state.showFileImporter && <FileImporter onLogoutClick={this.onLogoutClick} handleProvider={this.getHandle}/>}
+        {/* {this.state.showFileImporter && <FileImporter onLogoutClick={this.onLogoutClick} handleProvider={this.getHandle}/>} */}
         {this.state.showFileViewer && <FileViewer controller={this.fileViewerController}/>}
       </Stack>
     );
