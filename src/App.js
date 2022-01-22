@@ -7,15 +7,19 @@ import FileImporter from './FileImporter';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Stack } from 'react-bootstrap';
+import { FileViewer, FileViewerController }from './FileViewer';
+import { MonthViewerController } from './MonthViewer';
+import { FolderSelectionController } from './FolderSelection';
 
 class App extends React.Component {
   constructor() {
     super();
     this.state = {
       name: "React",
-      showLogin: true,
+      showLogin: false,
       showLoginCode: false,
       showFileImporter: false,
+      showFileViewer: true,
       googleDriveHandle: -1
     };
     this.getHandle = this.getHandle.bind(this);
@@ -27,6 +31,26 @@ class App extends React.Component {
     this.onLogoutClick = this.onLogoutClick.bind(this);
     this.onCodeSendClick = this.onCodeSendClick.bind(this);
     this.onCodeCloseClick = this.onCodeCloseClick.bind(this);
+    this.folderUpdateCallback = this.folderUpdateCallback.bind(this);
+    var folderSelectionController = new FolderSelectionController(
+      ["Pessoal/Minhas Planilhas/Vida na Holanda/Financeiro/2021/", 
+      "Financeiro/2021/"],
+      this.folderUpdateCallback);
+    var monthViewerControllers = [
+      new MonthViewerController("Janeiro", "Informacoes"), 
+      new MonthViewerController("Fevereiro", "Informacoes"),
+      new MonthViewerController("Marco", "Informacoes"),
+      new MonthViewerController("Abril", "Informacoes"),
+      new MonthViewerController("Maio", "Informacoes"),
+      new MonthViewerController("Junho", "Informacoes"),
+      new MonthViewerController("Julho", "Informacoes"),
+      new MonthViewerController("Agosto", "Informacoes"),
+      new MonthViewerController("Setembro", "Informacoes"),
+      new MonthViewerController("Outubro", "Informacoes"),
+      new MonthViewerController("Novembro", "Informacoes"),
+      new MonthViewerController("Dezembro", "Informacoes"),
+  ];
+    this.fileViewerController = new FileViewerController(monthViewerControllers, this.onLogoutClick, folderSelectionController);
   }
 
   toggleComponentVisibility(name, state) {
@@ -35,10 +59,13 @@ class App extends React.Component {
         this.setState({ showLogin: state });
         break;
       case "LoginCode":
-          this.setState({ showLoginCode: state });
-          break;
+        this.setState({ showLoginCode: state });
+        break;
       case "FileImporter":
         this.setState({ showFileImporter: state });
+        break;
+      case "FileViewer":
+        this.setState({ showFileViewer: state });
         break;
       default:
         break;
@@ -101,8 +128,11 @@ class App extends React.Component {
   }
 
   onLogoutClick() {
-    this.showComponent('Login');
-    this.hideComponent('FileImporter');
+    this.switchComponents('FileViewer', 'Login');
+  }
+
+  folderUpdateCallback(folder) {
+    console.log(folder);
   }
 
   render() {
@@ -114,6 +144,7 @@ class App extends React.Component {
         {this.state.showLogin && <LoginCard onClick={this.onLoginClick}/>}
         {this.state.showLoginCode && <LoginCode onCodeSendClick={this.onCodeSendClick} onCloseClick={this.onCodeCloseClick}/>}  
         {this.state.showFileImporter && <FileImporter onLogoutClick={this.onLogoutClick} handleProvider={this.getHandle}/>}
+        {this.state.showFileViewer && <FileViewer controller={this.fileViewerController}/>}
       </Stack>
     );
   }
