@@ -13,7 +13,7 @@ export default class LoadingButton extends React.Component {
 
     componentDidMount() {
         if (this.state.isLoading) {
-            this.onClickRequest().then(() => {
+            Promise.resolve(this.onClickRequest()).then(() => {
                 this.setState(() => ({
                     isLoading: false
                 }));
@@ -23,7 +23,7 @@ export default class LoadingButton extends React.Component {
 
     componentDidUpdate() {
         if (this.state.isLoading) {
-            this.onClickRequest().then(() => {
+            Promise.resolve(this.onClickRequest()).then(() => {
                 this.setState(() => ({
                     isLoading: false
                 }));
@@ -32,9 +32,11 @@ export default class LoadingButton extends React.Component {
     }
 
     handleClick(){
-        this.setState(() => ({
-            isLoading: true
-        }));
+        if (this.onClickRequest !== null){
+            this.setState(() => ({
+                isLoading: true
+            }));
+        }
     }
 
     render() {
