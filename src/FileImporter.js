@@ -169,10 +169,13 @@ class FolderSelection extends React.Component{
       }  
 } 
     
- 
+function serverAddress(){
+    return 'lorde.dosgatos:5000';
+    // return '127.0.0.1:5000';
+} 
 
   function requestAux(handle){
-    return fetch('http://127.0.0.1:5000/import_spreadsheet_from_google_drive_with_auth', {
+    return fetch('http://'+serverAddress()+'/import_spreadsheet_from_google_drive_with_auth', {
             method: 'POST',
             body: JSON.stringify({"handle":handle, "path":"Pessoal/Minhas Planilhas/Vida na Holanda/Financeiro/2021/Aux"}),
             headers: {
@@ -182,7 +185,7 @@ class FolderSelection extends React.Component{
 }
 
 function requestImport(handle, path, name){
-    return fetch('http://127.0.0.1:5000/import_spreadsheet_from_google_drive_with_auth', {
+    return fetch('http://'+serverAddress()+'/import_spreadsheet_from_google_drive_with_auth', {
             method: 'POST',
             body: JSON.stringify({"handle":handle, "path":path+name}),
             headers: {
@@ -192,7 +195,7 @@ function requestImport(handle, path, name){
 }
 
 function requestExport(handle, path, name){
-    return fetch('http://127.0.0.1:5000/export_spreadsheet_to_google_drive_with_auth', {
+    return fetch('http://'+serverAddress()+'/export_spreadsheet_to_google_drive_with_auth', {
             method: 'POST',
             body: JSON.stringify({
                     "handle": handle,
@@ -206,7 +209,7 @@ function requestExport(handle, path, name){
 }
 
 function requestGenerateDescription(month, account){
-        return fetch('http://127.0.0.1:5000/update_descriptions', {
+        return fetch('http://'+serverAddress()+'/update_descriptions', {
             method: 'POST',
             body: JSON.stringify(
             {
