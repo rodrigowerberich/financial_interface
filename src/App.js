@@ -148,10 +148,11 @@ class App extends React.Component {
   }
 
   async generateDescription(month) {
-    console.log(month);
+    var responseImportAux = await requestAux(this.getHandle(), this.folder);
+    var jsonImportAux = await responseImportAux.json();
     var responseImport = await requestImport(this.getHandle(), this.folder, month);
     var jsonImport = await responseImport.json();
-    var responseGenerate = await requestImport(this.getHandle(), this.folder, month);
+    var responseGenerate = await requestGenerateDescription(month, "Conta Conjunta NL");
     var jsonGenerate = await responseGenerate.json();
     var responseExport = await requestExport(this.getHandle(), this.folder, month);
     var jsonExport = await responseExport.json();
@@ -230,6 +231,16 @@ function requestGenerateDescription(month, account){
               'Content-Type': 'application/json'
             }
           });
+}
+
+function requestAux(handle, folder){
+  return fetch('http://'+serverAddress()+'/import_spreadsheet_from_google_drive_with_auth', {
+          method: 'POST',
+          body: JSON.stringify({"handle":handle, "path":folder+"Aux"}),
+          headers: {
+            'Content-Type': 'application/json'
+      }
+  });
 }
 
 export default App;
