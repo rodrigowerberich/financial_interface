@@ -31,6 +31,7 @@ class App extends React.Component {
     this.onCodeCloseClick = this.onCodeCloseClick.bind(this);
     this.folderUpdateCallback = this.folderUpdateCallback.bind(this);
     this.generateDescription = this.generateDescription.bind(this);
+    this.openSpreadsheetFromMonth = this.openSpreadsheetFromMonth.bind(this);
     var folderSelectionController = new FolderSelectionController(
       ["Pessoal/Minhas Planilhas/Vida na Holanda/Financeiro/2021/", 
       "Financeiro/2021/",
@@ -38,18 +39,18 @@ class App extends React.Component {
       "Financeiro/2022/"],
       this.folderUpdateCallback);
     this.monthViewerControllers = [
-      new MonthViewerController("01 - Janeiro", "Informacoes", this.generateDescription), 
-      new MonthViewerController("02 - Fevereiro", "Informacoes", this.generateDescription),
-      new MonthViewerController("03 - Marco", "Informacoes", this.generateDescription),
-      new MonthViewerController("04 - Abril", "Informacoes", this.generateDescription),
-      new MonthViewerController("05 - Maio", "Informacoes", this.generateDescription),
-      new MonthViewerController("06 - Junho", "Informacoes", this.generateDescription),
-      new MonthViewerController("07 - Julho", "Informacoes", this.generateDescription),
-      new MonthViewerController("08 - Agosto", "Informacoes", this.generateDescription),
-      new MonthViewerController("09 - Setembro", "Informacoes", this.generateDescription),
-      new MonthViewerController("10 - Outubro", "Informacoes", this.generateDescription),
-      new MonthViewerController("11 - Novembro", "Informacoes", this.generateDescription),
-      new MonthViewerController("12 - Dezembro", "Informacoes", this.generateDescription),
+      new MonthViewerController("01 - Janeiro", "Informacoes", this.generateDescription, this.openSpreadsheetFromMonth),
+      new MonthViewerController("02 - Fevereiro", "Informacoes", this.generateDescription, this.openSpreadsheetFromMonth),
+      new MonthViewerController("03 - Marco", "Informacoes", this.generateDescription, this.openSpreadsheetFromMonth),
+      new MonthViewerController("04 - Abril", "Informacoes", this.generateDescription, this.openSpreadsheetFromMonth),
+      new MonthViewerController("05 - Maio", "Informacoes", this.generateDescription, this.openSpreadsheetFromMonth),
+      new MonthViewerController("06 - Junho", "Informacoes", this.generateDescription, this.openSpreadsheetFromMonth),
+      new MonthViewerController("07 - Julho", "Informacoes", this.generateDescription, this.openSpreadsheetFromMonth),
+      new MonthViewerController("08 - Agosto", "Informacoes", this.generateDescription, this.openSpreadsheetFromMonth),
+      new MonthViewerController("09 - Setembro", "Informacoes", this.generateDescription, this.openSpreadsheetFromMonth),
+      new MonthViewerController("10 - Outubro", "Informacoes", this.generateDescription, this.openSpreadsheetFromMonth),
+      new MonthViewerController("11 - Novembro", "Informacoes", this.generateDescription, this.openSpreadsheetFromMonth),
+      new MonthViewerController("12 - Dezembro", "Informacoes", this.generateDescription, this.openSpreadsheetFromMonth),
   ];
     this.fileViewerController = new FileViewerController(this.monthViewerControllers  , this.onLogoutClick, folderSelectionController);
     this.folder = "Unselected";
@@ -201,6 +202,12 @@ class App extends React.Component {
     var jsonExport = await responseExport.json();
   }
 
+  async openSpreadsheetFromMonth(month){
+    var response = await requestLink(this.getHandle(), this.folder, month);
+    var json = await response.json();
+    window.open(json.link);
+  }
+
   render() {
     return (
       <Stack gap={3} style={{
@@ -240,6 +247,16 @@ function serverAddress(){
 
 function requestImport(handle, path, name){
   return fetch('http://'+serverAddress()+'/import_spreadsheet_from_google_drive_with_auth', {
+            method: 'POST',
+            body: JSON.stringify({"handle":handle, "path":path+name}),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+}
+
+function requestLink(handle, path, name){
+  return fetch('http://'+serverAddress()+'/get_file_link', {
             method: 'POST',
             body: JSON.stringify({"handle":handle, "path":path+name}),
             headers: {
