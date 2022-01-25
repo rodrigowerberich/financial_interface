@@ -31,7 +31,12 @@ export class LoadingButtonController{
         this.myView = view;
     }
 
-    geLoadingMessage(){
+    setLoadingMessage(newLoadingMessage){
+        this.loadingMessage = newLoadingMessage;
+        this.updateView();
+    }
+
+    getLoadingMessage(){
         return this.loadingMessage;
     }
 
@@ -52,7 +57,7 @@ export class LoadingButton extends React.Component {
         this.controller = props.controller;
         this.state = { 
             isLoading:false,
-            loadingMessage:this.controller.geLoadingMessage(),
+            loadingMessage:this.controller.getLoadingMessage(),
             defaultMessage:this.controller.getDefaultMessage()
         };
         this.controller.view = this;
@@ -60,30 +65,17 @@ export class LoadingButton extends React.Component {
         this.handleClick = this.handleClick.bind(this);
     }
 
-    componentDidMount() {
-        if (this.state.isLoading) {
-            Promise.resolve(this.onClickRequest()).then(() => {
-                this.setState(() => ({
-                    isLoading: false
-                }));
-            });
-        }
-    }
-
-    componentDidUpdate() {
-        if (this.state.isLoading) {
-            Promise.resolve(this.onClickRequest()).then(() => {
-                this.setState(() => ({
-                    isLoading: false
-                }));
-            });
-        }
-    }
-
     updateView(){
         this.setState(()=>({ 
-            loadingMessage:this.controller.geLoadingMessage(),
+            loadingMessage:this.controller.getLoadingMessage(),
             defaultMessage:this.controller.getDefaultMessage()
+        }));
+    }
+
+    async callOnClickRequest(){
+        await this.onClickRequest();
+        this.setState(() => ({
+            isLoading: false
         }));
     }
 
@@ -92,6 +84,7 @@ export class LoadingButton extends React.Component {
             this.setState(() => ({
                 isLoading: true
             }));
+            this.callOnClickRequest();
         }
     }
 
@@ -101,51 +94,3 @@ export class LoadingButton extends React.Component {
           );
     }
 }
-
-// export default class LoadingButton extends React.Component {
-//     constructor(props) {
-//         super(props);
-//         this.state = { 
-//             isLoading:false,
-//             loadingMessage:props.loadingMessage,
-//             defaultMessage:props.defaultMessage
-
-//          };
-//         this.onClickRequest = props.onClickRequest
-//         this.handleClick = this.handleClick.bind(this);
-//     }
-
-//     componentDidMount() {
-//         if (this.state.isLoading) {
-//             Promise.resolve(this.onClickRequest()).then(() => {
-//                 this.setState(() => ({
-//                     isLoading: false
-//                 }));
-//             });
-//         }
-//     }
-
-//     componentDidUpdate() {
-//         if (this.state.isLoading) {
-//             Promise.resolve(this.onClickRequest()).then(() => {
-//                 this.setState(() => ({
-//                     isLoading: false
-//                 }));
-//             });
-//         }
-//     }
-
-//     handleClick(){
-//         if (this.onClickRequest !== null){
-//             this.setState(() => ({
-//                 isLoading: true
-//             }));
-//         }
-//     }
-
-//     render() {
-//         return (
-//             <Button onClick={!this.state.isLoading ? this.handleClick : null} {...this.props}>{this.state.isLoading ? this.state.loadingMessage : this.state.defaultMessage}</Button>
-//           );
-//     }
-// }

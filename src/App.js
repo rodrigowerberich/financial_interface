@@ -148,12 +148,55 @@ class App extends React.Component {
   }
 
   async generateDescription(month) {
+    function monthToIndex(){
+      if (month === "01 - Janeiro"){
+        return 0;
+      }
+      else if (month === "02 - Fevereiro"){
+        return 1;
+      }
+      else if (month === "03 - Marco"){
+        return 2;
+      }
+      else if (month === "04 - Abril"){
+        return 3;
+      }
+      else if (month === "05 - Maio"){
+        return 4;
+      }
+      else if (month === "06 - Junho"){
+        return 5;
+      }
+      else if (month === "07 - Julho"){
+        return 6;
+      }
+      else if (month === "08 - Agosto"){
+        return 7;
+      }
+      else if (month === "09 - Setembro"){
+        return 8;
+      }
+      else if (month === "10 - Outubro"){
+        return 9;
+      }
+      else if (month === "11 - Novembro"){
+        return 10;
+      }
+      else if (month === "12 - Dezembro"){
+        return 11;
+      }
+    }
+    var monthViewController = this.monthViewerControllers[monthToIndex()];
+    monthViewController.loadingButtonController.setLoadingMessage("Importando aux...");
     var responseImportAux = await requestAux(this.getHandle(), this.folder);
     var jsonImportAux = await responseImportAux.json();
+    monthViewController.loadingButtonController.setLoadingMessage("Importando planilha...");
     var responseImport = await requestImport(this.getHandle(), this.folder, month);
     var jsonImport = await responseImport.json();
+    monthViewController.loadingButtonController.setLoadingMessage("Gerando descricoes...");
     var responseGenerate = await requestGenerateDescription(month, "Conta Conjunta NL");
     var jsonGenerate = await responseGenerate.json();
+    monthViewController.loadingButtonController.setLoadingMessage("Exportando planilha...");
     var responseExport = await requestExport(this.getHandle(), this.folder, month);
     var jsonExport = await responseExport.json();
   }
